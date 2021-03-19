@@ -1,0 +1,15 @@
+{
+    "type": "record",
+    "name": "SocialMediaActivity",
+    "namespace": "xiaoyf.demo.avrokafka.model",
+    "fields": [
+        {
+            "name" : "appName",
+            "type" : "string"
+        },
+        {
+            "name" : "timeSpent",
+            "type" : "long"
+        }
+    ]
+}

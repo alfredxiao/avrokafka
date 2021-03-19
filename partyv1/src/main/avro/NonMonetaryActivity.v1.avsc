@@ -1,0 +1,15 @@
+{
+    "type": "record",
+    "name": "NonMonetaryActivity",
+    "namespace": "xiaoyf.demo.avrokafka.model",
+    "fields": [
+        {
+            "name" : "action",
+            "type" : "string"
+        },
+        {
+            "name" : "when",
+            "type" : "long"
+        }
+    ]
+}

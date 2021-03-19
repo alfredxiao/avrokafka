@@ -1,0 +1,11 @@
+{
+    "type": "record",
+    "name": "Transaction",
+    "namespace": "xiaoyf.demo.avrokafka.model",
+    "fields": [
+        {
+            "name" : "amount",
+            "type" : "long"
+        }
+    ]
+}

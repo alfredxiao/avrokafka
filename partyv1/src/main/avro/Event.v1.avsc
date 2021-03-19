@@ -1,0 +1,35 @@
+{
+    "type": "record",
+    "name": "Event",
+    "namespace": "xiaoyf.demo.avrokafka.model",
+    "fields": [
+        {
+            "name" : "type",
+            "type" : "string"
+        },
+        {
+            "name" : "eventId",
+            "type" : "string"
+        },
+        {
+            "name" : "payload",
+            "type" : [
+                "null",
+                {
+                    "type" : "record",
+                    "name" : "Sms",
+                    "fields" : [
+                        {
+                            "name" : "phoneNumber",
+                            "type" : "string"
+                        },
+                        {
+                            "name" : "text",
+                            "type" : "string"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

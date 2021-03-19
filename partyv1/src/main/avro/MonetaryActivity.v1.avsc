@@ -1,0 +1,15 @@
+{
+    "type": "record",
+    "name": "MonetaryActivity",
+    "namespace": "xiaoyf.demo.avrokafka.model",
+    "fields": [
+        {
+            "name" : "amount",
+            "type" : "long"
+        },
+        {
+            "name" : "category",
+            "type" : "string"
+        }
+    ]
+}
