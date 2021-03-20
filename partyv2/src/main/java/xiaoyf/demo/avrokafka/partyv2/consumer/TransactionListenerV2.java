@@ -17,8 +17,6 @@ public class TransactionListenerV2 {
 
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, TransactionListenerV2.class.getName());
-
-
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
 		props.put("schema.registry.url", SCHEMA_REGISTRY_URL);
