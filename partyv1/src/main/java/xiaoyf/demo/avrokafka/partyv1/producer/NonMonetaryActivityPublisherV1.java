@@ -32,6 +32,7 @@ public class NonMonetaryActivityPublisherV1 {
 
 		ProducerRecord<String, NonMonetaryActivity> record = new ProducerRecord<>(ACTIVITY_TOPIC, key, tx);
 		try {
+			record.headers().add("Type", "NonMonetaryActivity".getBytes());
 			producer.send(record);
 		} catch(SerializationException e) {
 			e.printStackTrace();

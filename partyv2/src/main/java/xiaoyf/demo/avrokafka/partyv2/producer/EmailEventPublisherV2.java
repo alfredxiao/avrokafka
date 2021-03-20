@@ -37,6 +37,7 @@ public class EmailEventPublisherV2 {
 
 		ProducerRecord<String, Event> record = new ProducerRecord<>(EVENT_TOPIC, key, event);
 		try {
+			record.headers().add("Type", "Email".getBytes());
 			producer.send(record);
 		} catch(SerializationException e) {
 			e.printStackTrace();

@@ -32,6 +32,7 @@ public class SocialMediaActivityPublisherV2 {
 
 		ProducerRecord<String, SocialMediaActivity> record = new ProducerRecord<>(ACTIVITY_TOPIC, key, tx);
 		try {
+			record.headers().add("Type", "SocialMediaActivity".getBytes());
 			producer.send(record);
 		} catch(SerializationException e) {
 			e.printStackTrace();

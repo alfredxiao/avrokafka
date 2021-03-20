@@ -18,14 +18,22 @@ public class EventListenerV1 {
 		Properties props = new Properties();
 
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, EventListenerV1.class.getName());
-		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
-//		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
-		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, TolerantDeserializer.class);
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, EventListenerV1.class.getName()+"15");
 		props.put("schema.registry.url", SCHEMA_REGISTRY_URL);
 		props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
 
+		// To use 'standard' deserializer
+		// props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
+
+		// To use custom tolerant deserializer
+		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, TolerantDeserializer.class);
+		// silentOnUnknownClasses is set to 'true' by default
+		props.put("tolerant.silentOnUnknownClasses", false);
+		// To enable filter by header
+		 props.put("tolerant.headerName", "Type");
+		 props.put("tolerant.headerValueRegex", "Sms");
 
 		final Consumer<String, Event> consumer = new KafkaConsumer<String, Event>(props);
 		consumer.subscribe(Collections.singletonList(EVENT_TOPIC));
@@ -41,6 +49,7 @@ public class EventListenerV1 {
 						System.out.printf(" - type:%s, payload:%s\n", event.getType(), event.getPayload());
 					}
 				}
+				consumer.commitSync();
 			}
 		} catch(Exception e) {
 			System.err.println("Shit, error!!! " + e.getMessage());

@@ -19,16 +19,22 @@ public class ActivityListenerV1 {
 		Properties props = new Properties();
 
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, ActivityListenerV1.class.getName() + "11");
-
-
-		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
-//		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
-		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, TolerantDeserializer.class);
 		props.put("schema.registry.url", SCHEMA_REGISTRY_URL);
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, ActivityListenerV1.class.getName());
 		props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
 
+		// To use 'standard' deserializer
+		// props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
+
+		// To use custom tolerant deserializer
+		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, TolerantDeserializer.class);
+		// silentOnUnknownClasses is set to 'true' by default
+		props.put("tolerant.silentOnUnknownClasses", true);
+		// To enable filter by header
+		// props.put("tolerant.headerName", "Type");
+		// props.put("tolerant.headerValueRegex", "MonetaryActivity|NonMonetaryActivity");
 
 		final Consumer<String, SpecificRecordBase> consumer = new KafkaConsumer<>(props);
 		consumer.subscribe(Collections.singletonList(ACTIVITY_TOPIC));

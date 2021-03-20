@@ -37,6 +37,7 @@ public class TransactionListenerV1 {
 					System.out.printf("offset = %d, key = %s, value = %s \n", record.offset(), record.key(), tx);
 					System.out.printf(" - amount: %s \n", tx.getAmount());
 				}
+				consumer.commitSync();
 			}
 		} finally {
 			consumer.close();

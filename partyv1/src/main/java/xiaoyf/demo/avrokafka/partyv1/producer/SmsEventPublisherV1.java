@@ -36,6 +36,7 @@ public class SmsEventPublisherV1 {
 
 		ProducerRecord<String, Event> record = new ProducerRecord<>(EVENT_TOPIC, key, event);
 		try {
+			record.headers().add("Type", "Sms".getBytes());
 			producer.send(record);
 		} catch(SerializationException e) {
 			e.printStackTrace();

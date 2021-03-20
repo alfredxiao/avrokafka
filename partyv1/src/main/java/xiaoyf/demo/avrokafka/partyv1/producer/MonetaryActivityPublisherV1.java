@@ -32,6 +32,7 @@ public class MonetaryActivityPublisherV1 {
 
 		ProducerRecord<String, MonetaryActivity> record = new ProducerRecord<>(ACTIVITY_TOPIC, key, tx);
 		try {
+			record.headers().add("Type", "MonetaryActivity".getBytes());
 			producer.send(record);
 		} catch(SerializationException e) {
 			e.printStackTrace();
