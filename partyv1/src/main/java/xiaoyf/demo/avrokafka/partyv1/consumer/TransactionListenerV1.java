@@ -17,14 +17,11 @@ public class TransactionListenerV1 {
 
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, TransactionListenerV1.class.getName());
-
-
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
 		props.put("schema.registry.url", SCHEMA_REGISTRY_URL);
 		props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
 
 		final Consumer<String, Transaction> consumer = new KafkaConsumer<>(props);
 		consumer.subscribe(Collections.singletonList(TRANSACTION_TOPIC));

@@ -18,7 +18,7 @@ public class EventListenerV1 {
 		Properties props = new Properties();
 
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, EventListenerV1.class.getName()+"15");
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, EventListenerV1.class.getName());
 		props.put("schema.registry.url", SCHEMA_REGISTRY_URL);
 		props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -32,8 +32,8 @@ public class EventListenerV1 {
 		// silentOnUnknownClasses is set to 'true' by default
 		props.put("tolerant.silentOnUnknownClasses", false);
 		// To enable filter by header
-		 props.put("tolerant.headerName", "Type");
-		 props.put("tolerant.headerValueRegex", "Sms");
+	  props.put("tolerant.headerName", "Type");
+	  props.put("tolerant.headerValueRegex", "Sms");
 
 		final Consumer<String, Event> consumer = new KafkaConsumer<String, Event>(props);
 		consumer.subscribe(Collections.singletonList(EVENT_TOPIC));

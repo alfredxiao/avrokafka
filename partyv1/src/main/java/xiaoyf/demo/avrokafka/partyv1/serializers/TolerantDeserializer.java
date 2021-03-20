@@ -21,10 +21,10 @@ import static java.lang.Boolean.TRUE;
 public class TolerantDeserializer implements Deserializer<Object> {
 	protected KafkaAvroDeserializer worker;
 	protected boolean silentOnUnknownClasses;   // when 'true': return null for unknown classes or unknown union type
-	protected String headerName;           // if set: check header values under this name
-	protected String headerValueRegex;    // only relevant when 'checkHeaderName' is also set. when both set,
-												// accept only certain messages whose header name and value match
-												// our configuration, otherwise return null
+	protected String headerName;                // if set: check header values under this name
+	protected String headerValueRegex;          // only relevant when 'checkHeaderName' is also set. when both set,
+																							// accept only certain messages whose header name and value match
+																							// our configuration, otherwise return null
 
 	public TolerantDeserializer() {
 		worker = new KafkaAvroDeserializer();
