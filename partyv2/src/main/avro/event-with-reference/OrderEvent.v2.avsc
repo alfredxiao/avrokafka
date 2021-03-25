@@ -1,0 +1,5 @@
+[
+    "xiaoyf.demo.avrokafka.model.PlaceOrderEvent",
+    "xiaoyf.demo.avrokafka.model.OrderDeliveryEvent",
+    "xiaoyf.demo.avrokafka.model.OrderCancellationEvent"
+]

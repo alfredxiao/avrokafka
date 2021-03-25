@@ -1,0 +1,19 @@
+{
+    "type": "record",
+    "name": "OrderDeliveryEvent",
+    "namespace": "xiaoyf.demo.avrokafka.model",
+    "fields": [
+        {
+            "name" : "orderId",
+            "type" : "string"
+        },
+        {
+            "name" : "delivered",
+            "type" : "boolean"
+        },
+        {
+            "name" : "when",
+            "type" : "long"
+        }
+    ]
+}

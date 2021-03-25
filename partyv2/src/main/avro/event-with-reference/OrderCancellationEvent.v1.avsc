@@ -1,0 +1,15 @@
+{
+    "type": "record",
+    "name": "OrderCancellationEvent",
+    "namespace": "xiaoyf.demo.avrokafka.model",
+    "fields": [
+        {
+            "name" : "orderId",
+            "type" : "string"
+        },
+        {
+            "name" : "reason",
+            "type" : "string"
+        }
+    ]
+}

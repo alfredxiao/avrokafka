@@ -6,4 +6,5 @@ public class Constants {
 	public static final String TRANSACTION_TOPIC = "transactions";
 	public static final String EVENT_TOPIC = "events";
 	public static final String ACTIVITY_TOPIC = "activities";
+	public static final String ORDER_EVENT_TOPIC = "order-events";
 }
