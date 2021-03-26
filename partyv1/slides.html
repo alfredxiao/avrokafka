@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multitype Messages in the Same Kafka Topic</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+
+      div.remark-slide-scaler {
+        width: 100%;
+      }
+
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      li{
+        margin: 12px 0;
+      }
+
+      #union-for-multitype + p + pre .avro {
+        font-size: 11px
+      }
+
+      #techniques-kafka-headers + ul pre .Java {
+        font-size: 16px;
+      }
+
+      #techniques-swallow-but-not-digest + ul  pre .Java {
+        font-size: 14.5px;
+      }
+    </style>
+</head>
+<body>
+<textarea id="source">
+
+smile: AA
+class: center, middle
+
+# Multitype Messages in the Same Kafka Topic
+Options & Challenges, Apr 2021
+---
+
+# Agenda
+
+0. Prelude
+1. Why Multitype
+2. Options
+3. Challenges
+4. Techniques
+---
+# Prelude
+
+* Avro + Schema Registry + Kafka + Java
+* One topic one type
+    * just like one database table one entity
+
+---
+arrow: &#8680;
+# Why Multitype
+* **Multitype**
+    - Events are multityped in nature within many business domains
+    - Events evolve as business evolve
+* **Ordering !!!**
+    - Ordering is CRITICAL to event based systems
+        * have_your_cake {{arrow}} eat_it {{arrow}} &#129335;
+        * eat_it {{arrow}} have_your_cake {{arrow}} &#127881;
+    - Kafka reserves the order of events ONLY if they are in the same partition
+        * Being in the same topic is the prerequisite of being in the same partition
+
+---
+# Options
+* JSON
+* Tuple of KVP
+* Map
+* Union
+* Subject Naming Strategy
+
+---
+golf: &#127948;
+up: &#128077;
+heavy: &#127947;
+down: &#128078;
+confused: &#128533;
+fcross: &#129310;
+# JSON
+* {{golf}} NO Schema at all, super flexible
+* {{fcross}} Good luck on producers & consumers
+* This is effectively similar to using Compatibility Type `NONE` in Avro
+<br/><br/><br/><br/><br/><br/><br/><br/>
+This is not saying you can't enforce schema with JSON
+
+---
+golf: &#127948;
+up: &#128077;
+heavy: &#127947;
+down: &#128078;
+juggle: &#129337;
+fcross: &#129310;
+# Tuple & Map
+* {{golf}} One Schema for All
+* {{up}} Unique keys (Map only)
+* {{juggle}} Challenge to support various value types
+* {{heavy}} Difficult for nested structure
+* {{fcross}} Responsibilities on producers & consumers
+
+---
+# Union
+* In computer science, a union is a value that may have any of several representations or formats within the same position in memory. &#8213; Wikipedia
+* In Avro, a union indicates that a field might have more than one data type. E.g.
+```avro
+    {
+      "name": "text",
+      "type": ["string", "long"]
+    }
+```
+
+---
+# Union for Multitype
+In below schema, `payload` holds either a `Sms` or `Email` type
+```avro
+{
+  "type": "record",
+  "name": "Event",
+  "namespace": "demo.model",
+  "fields": [
+    {
+      "name" : "eventId",
+      "type" : "string"
+    },{
+      "name" : "payload",
+      "type" : [
+        {
+          "type" : "record",
+          "name" : "Sms",
+          "fields" : [
+            {
+              "name" : "phoneNumber",
+              "type" : "string"
+            },{
+              "name" : "text",
+              "type" : "string"
+            }
+          ]
+        },{
+          "type" : "record",
+          "name" : "Email",
+          "fields" : [
+            {
+              "name" : "address",
+              "type" : "string"
+            },{
+              "name" : "title",
+              "type" : "string"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+down: &#128078;
+Q: &#127328;
+A: &#127312;
+# Subject Naming Strategy
+* What is **Subject**?
+    * {{Q}} : Can I use schema-registry without Kafka broker independently? (Schema Registry Issue #533)
+    * {{A}} : Definitely. That's why we use slightly different terminology in the schema registry ("subjects") than we use in Kafka ("topics").
+* `TopicNameStrategy` (default): `<topic>-value`
+* `RecordNameStrategy`: `<record-name>`
+* `TopicRecordNameStrategy`: `<topic-record-name>`
+* {{down}} Control Center UI supports `TopicNameStrategy` only
+
+---
+# Code Using RecordNameStrategy
+Producer
+```Java
+props.put("value.subject.name.strategy", RecordNameStrategy.class);
+
+// Subject: demo.MonetaryActivity
+KafkaProducer<String, MonetaryActivity> producer1 = new KafkaProducer<>(props);
+ProducerRecord<String, MonetaryActivity> record1 =
+    new ProducerRecord<>("activity-topic", "key1", new MonetaryActivity());
+producer1.send(record1);
+
+// Subject: demo.NonMonetaryActivity
+KafkaProducer<String, NonMonetaryActivity> producer2 = new KafkaProducer<>(props);
+ProducerRecord<String, NonMonetaryActivity> record2 =
+    new ProducerRecord<>("activity-topic", "key2", new NonMonetaryActivity());
+producer2.send(record2);
+```
+Consumer
+```Java
+ConsumerRecords<String, SpecificRecordBase> records = consumer.poll(ONE_SECOND);
+for (ConsumerRecord<String, SpecificRecordBase> record : records) {
+    if (record.value() instanceof MonetaryActivity) {
+        ...
+    }
+}
+```
+
+---
+no:&#128683;
+rain:&#127783;
+# Challenges
+* Because Kafka brokers are DUMB
+    * {{no}} Message Filtering - similar to `SELECT...WHERE...` in `SQL`, and Message Selector in JMS
+* and Kafka expects that
+    * Any consumer to parse and take all messages it receives
+* {{rain}} Consequently, Introducing new types BREAKS existing consumers
+    * Unless the consumer upgrade to newer schema
+    * This happens to both the Union and Subject Naming Strategy approaches
+
+---
+# Techniques - GenericRecord
+* Consumer use `GenericRecord` rather than `SpecificRecord`
+* This is similar to Tuples and Map
+
+---
+# Techniques - Kafka Headers
+* **Header** exists in many places, TCP, HTTP, HTML, JMS, SOAP, etc.
+* Headers are **Metadata**, serve purposes like routing, authentication, etc.
+* Header support added to Kafka in version 0.11 in 2017
+```Java
+public interface Header {
+  &#8192;&#8192;String key();
+  &#8192;&#8192;byte[] value();
+}
+```
+* Producer sends messages with header
+```Java
+ProducerRecord<String, MonetaryActivity> record = new ProducerRecord<>();
+record.headers().add("Type", "MonetaryActivity".getBytes(UTF_8));
+producer.send(record);
+```
+* Header support added to `Deserialiser` interface in 2018
+```Java
+public interface Deserializer<T> {
+  &#8192;&#8192;void configure(Map<String, ?> configs, boolean isKey);
+  &#8192;&#8192;T deserialize(String topic, byte[] data);
+  &#8192;&#8192;T deserialize(String topic, Headers headers, byte[] data);
+}
+```
+
+---
+cowork: &#129309;
+# Techniques - Swallow But Not Digest
+* {{cowork}} Filter out those unwanted messages
+    * Deserializer convert them into `null`
+    * Consumers ignore `null` messages and continue
+* Customer Deserializer
+    ```Java
+    KafkaAvroDeserializer worker;
+    public TolerantDeserializer() {
+		worker = new KafkaAvroDeserializer();
+	}
+    public Object deserialize(String topic, Headers headers, byte[] data) {
+        if (!accepts(headers)) return null;
+
+        return worker.deserialize(topic, headers, data);
+    }
+    ```
+* Consumer
+    ```Java
+    props.put("value.deserializer", TolerantDeserializer.class);
+    props.put("tolerant.headerName", "Type");
+    props.put("tolerant.headerValueRegex", "MonetaryActivity|NonMonetaryActivity");
+
+    for (ConsumerRecord<String, SpecificRecordBase> record : records) {
+        if (Objects.isNull(record.value())) continue;
+    }
+    ```
+</textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js">
+</script>
+<script>
+      var slideshow = remark.create({ ratio: "16:9" });
+    </script>
+</body>
+</html>
