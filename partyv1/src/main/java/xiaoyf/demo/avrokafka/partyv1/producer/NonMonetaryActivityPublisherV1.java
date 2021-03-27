@@ -1,11 +1,12 @@
 package xiaoyf.demo.avrokafka.partyv1.producer;
 
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.SerializationException;
-import xiaoyf.demo.avrokafka.model.NonMonetaryActivity;
+import demo.model.NonMonetaryActivity;
 
 import java.util.Properties;
 
@@ -19,7 +20,7 @@ public class NonMonetaryActivityPublisherV1 {
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
 		props.put("schema.registry.url", SCHEMA_REGISTRY_URL);
 		props.put("auto.register.schemas", true);
-		props.put(KafkaAvroDeserializerConfig.VALUE_SUBJECT_NAME_STRATEGY, io.confluent.kafka.serializers.subject.RecordNameStrategy.class);
+		props.put(AbstractKafkaAvroSerDeConfig.VALUE_SUBJECT_NAME_STRATEGY, io.confluent.kafka.serializers.subject.RecordNameStrategy.class);
 		KafkaProducer<String, NonMonetaryActivity> producer = new KafkaProducer<>(props);
 
 		long timestamp = System.currentTimeMillis();

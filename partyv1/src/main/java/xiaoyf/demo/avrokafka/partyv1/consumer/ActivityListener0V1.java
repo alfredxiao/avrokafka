@@ -32,6 +32,7 @@ public class ActivityListener0V1 {
 				for (ConsumerRecord<String, GenericRecord> record : records) {
 					System.out.printf("offset = %d, key = %s, value = %s \n", record.offset(), record.key(), record.value());
 				}
+				consumer.commitSync();
 			}
 		} finally {
 			consumer.close();

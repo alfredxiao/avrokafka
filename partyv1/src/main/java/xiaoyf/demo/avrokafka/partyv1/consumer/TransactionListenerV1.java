@@ -2,7 +2,7 @@ package xiaoyf.demo.avrokafka.partyv1.consumer;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import org.apache.kafka.clients.consumer.*;
-import xiaoyf.demo.avrokafka.model.Transaction;
+import demo.model.Transaction;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;

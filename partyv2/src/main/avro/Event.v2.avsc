@@ -1,12 +1,8 @@
 {
     "type": "record",
     "name": "Event",
-    "namespace": "xiaoyf.demo.avrokafka.model",
+    "namespace": "demo.model",
     "fields": [
-        {
-            "name" : "type",
-            "type" : "string"
-        },
         {
             "name" : "eventId",
             "type" : "string"

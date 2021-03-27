@@ -2,7 +2,7 @@ package xiaoyf.demo.avrokafka.partyv1.consumer;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import org.apache.kafka.clients.consumer.*;
-import xiaoyf.demo.avrokafka.model.Event;
+import demo.model.Event;
 import xiaoyf.demo.avrokafka.partyv1.serializers.TolerantDeserializer;
 
 import java.time.Duration;

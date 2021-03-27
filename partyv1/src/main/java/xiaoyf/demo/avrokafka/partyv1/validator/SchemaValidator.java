@@ -3,10 +3,10 @@ package xiaoyf.demo.avrokafka.partyv1.validator;
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import okhttp3.*;
 import org.apache.avro.Schema;
-import xiaoyf.demo.avrokafka.model.Event;
-import xiaoyf.demo.avrokafka.model.MonetaryActivity;
-import xiaoyf.demo.avrokafka.model.NonMonetaryActivity;
-import xiaoyf.demo.avrokafka.model.Transaction;
+import demo.model.Event;
+import demo.model.MonetaryActivity;
+import demo.model.NonMonetaryActivity;
+import demo.model.Transaction;
 
 import java.io.IOException;
 import java.util.Objects;

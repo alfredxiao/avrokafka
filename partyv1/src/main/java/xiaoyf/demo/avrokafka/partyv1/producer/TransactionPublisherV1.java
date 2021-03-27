@@ -4,7 +4,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.SerializationException;
-import xiaoyf.demo.avrokafka.model.Transaction;
+import demo.model.Transaction;
 
 import java.util.Properties;
 

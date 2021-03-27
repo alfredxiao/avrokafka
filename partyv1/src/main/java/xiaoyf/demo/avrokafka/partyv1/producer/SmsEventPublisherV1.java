@@ -4,8 +4,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.SerializationException;
-import xiaoyf.demo.avrokafka.model.Event;
-import xiaoyf.demo.avrokafka.model.Sms;
+import demo.model.Event;
+import demo.model.Sms;
 
 import java.util.Properties;
 
@@ -25,7 +25,6 @@ public class SmsEventPublisherV1 {
 
 		String key = "key-" + timestamp;
 		Event event = Event.newBuilder()
-				.setType("Sms")
 				.setEventId("event-" + timestamp)
 				.setPayload(
 						Sms.newBuilder()

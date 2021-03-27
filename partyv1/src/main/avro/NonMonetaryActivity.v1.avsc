@@ -1,7 +1,7 @@
 {
     "type": "record",
     "name": "NonMonetaryActivity",
-    "namespace": "xiaoyf.demo.avrokafka.model",
+    "namespace": "demo.model",
     "fields": [
         {
             "name" : "action",

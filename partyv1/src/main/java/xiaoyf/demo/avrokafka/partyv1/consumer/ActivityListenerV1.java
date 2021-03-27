@@ -3,8 +3,8 @@ package xiaoyf.demo.avrokafka.partyv1.consumer;
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.*;
-import xiaoyf.demo.avrokafka.model.MonetaryActivity;
-import xiaoyf.demo.avrokafka.model.NonMonetaryActivity;
+import demo.model.MonetaryActivity;
+import demo.model.NonMonetaryActivity;
 import xiaoyf.demo.avrokafka.partyv1.serializers.TolerantDeserializer;
 
 import java.time.Duration;

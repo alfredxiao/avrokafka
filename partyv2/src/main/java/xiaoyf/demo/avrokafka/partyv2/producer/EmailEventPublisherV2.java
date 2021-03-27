@@ -26,7 +26,6 @@ public class EmailEventPublisherV2 {
 
 		String key = "key-" + timestamp;
 		Event event = Event.newBuilder()
-				.setType("Email")
 				.setEventId("event-" + timestamp)
 				.setPayload(
 						Email.newBuilder()
