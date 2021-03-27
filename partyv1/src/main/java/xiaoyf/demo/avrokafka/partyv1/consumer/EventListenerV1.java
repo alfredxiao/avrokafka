@@ -46,7 +46,7 @@ public class EventListenerV1 {
 					System.out.printf("offset = %d, key = %s, value = %s \n", record.offset(), record.key(), event);
 
 					if (Objects.nonNull(event)) {
-						System.out.printf(" - type:%s, payload:%s\n", event.getType(), event.getPayload());
+						System.out.printf(" - id:%s, payload:%s\n", event.getEventId(), event.getPayload());
 					}
 				}
 				consumer.commitSync();
