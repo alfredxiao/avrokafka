@@ -49,6 +49,10 @@
         margin-top: 12px;
         margin-bottom: 12px;
       }
+
+      #conclusion + ul {
+        font-size: 28px;
+      }
     </style>
 </head>
 <body>
@@ -58,7 +62,7 @@ smile: AA
 class: center, middle
 
 # Multitype Messages in the Same Kafka Topic
-Options & Challenges, Apr 2021
+Options, Challenges, and Techniques, Apr 2021
 ---
 
 # Agenda
@@ -77,7 +81,7 @@ Options & Challenges, Apr 2021
     * just like in database, one-table-one-entity
 ---
 arrow: &#8680;
-# Why Multitype
+# Why Multitype in the Same Topic
 * Business nature
     - Events are naturally multityped within many business domains
     - Events evolve as business evolve, they are unforeseeable
@@ -111,7 +115,7 @@ fcross: &#129310;
 * This is effectively similar to using Compatibility Type `NONE` in Avro
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
-&#128073; This is not saying you can't enforce schema with JSON
+&#128073; This is not saying one can't enforce schema with JSON
 
 ---
 golf: &#127948;
@@ -190,6 +194,7 @@ In below schema, `payload` holds either a `Sms` or `Email` type
 ```
 
 ---
+up: &#128077;
 down: &#128078;
 Q: &#127328;
 A: &#127312;
@@ -197,56 +202,89 @@ A: &#127312;
 * What is **Subject**?
     * {{Q}} : Can I use schema-registry without Kafka broker independently? (Schema Registry Issue #533)
     * {{A}} : Definitely. That's why we use slightly different terminology in the schema registry ("subjects") than we use in Kafka ("topics").
-* `TopicNameStrategy` (default): `<topic>-value`
-* `RecordNameStrategy`: `<record-name>`
-* `TopicRecordNameStrategy`: `<topic-record-name>`
+* Mostly, people want one-topic-one-type, that is one-topic-one-subject
+    - Exactly the default strategy: `TopicNameStrategy`
+* Two other strategies
+    - `RecordNameStrategy`
+    - `TopicRecordNameStrategy`
+* {{up}} Types evolve independently
 
-<br/><br/><br/><br/><br/><br/><br/><br/>
+---
+# Naming Strategies in Action
+* Producer publishes customer activities to a topic named `activity`, when using strategy
+* `TopicNameStrategy` (default)
+    - `activity-value`, only one type of message allowed
+* `RecordNameStrategy`
+    - `demo.model.MonetaryActivity`
+    - `demo.model.NonMonetaryActivity`
+    - ...
+* `TopicRecordNameStrategy`
+    - `activity-demo.model.MonetaryActivity`
+    - `activity-demo.model.NonMonetaryActivity`
+    - ...
+
+<br/><br/>
 &#128073; Control Center UI supports `TopicNameStrategy` only
 
 ---
-# RecordNameStrategy in Code
+# Naming Strategy in Code
 * Producer
     ```Java
-    props.put("value.subject.name.strategy", RecordNameStrategy.class);
+    props.put("value.subject.name.strategy", TopicRecordNameStrategy.class);
+    KafkaProducer producer = new KafkaProducer(props);
 
-    // Subject: demo.MonetaryActivity (activity-value, in default strategy)
-    KafkaProducer<String, MonetaryActivity> producer1 = new KafkaProducer<>(props);
-    ProducerRecord<String, MonetaryActivity> record1 =
-        new ProducerRecord<>("activity", "key1", new MonetaryActivity());
-    producer1.send(record1);
+    // Subject: activity-demo.model.MonetaryActivity
+    producer.send(new ProducerRecord("activity", "key1", new MonetaryActivity()));
 
-    // Subject: demo.NonMonetaryActivity (activity-value, in default strategy)
-    KafkaProducer<String, NonMonetaryActivity> producer2 = new KafkaProducer<>(props);
-    ProducerRecord<String, NonMonetaryActivity> record2 =
-        new ProducerRecord<>("activity", "key2", new NonMonetaryActivity());
-    producer2.send(record2);
+    // Subject: activity-demo.model.NonMonetaryActivity  (same topic as above)
+    producer.send(new ProducerRecord("activity", "key2", new NonMonetaryActivity()));
     ```
 * Consumer
     ```Java
-    ConsumerRecords<String, SpecificRecordBase> records = consumer.poll(ONE_SECOND);
-    for (ConsumerRecord<String, SpecificRecordBase> record : records) {
-        if (record.value() instanceof MonetaryActivity) {
-            ...
-        }
+    ConsumerRecords records = consumer.poll(ONE_SECOND);
+    for (ConsumerRecord record : records) {
+        Object activity = record.value();
+        if (activity instanceof MonetaryActivity) { ... }
+        if (activity instanceof NonMonetaryActivity) { ... }
     }
     ```
 
+<br/>
+&#128073; Generics omitted for brevity
+
 ---
 no:&#10060;
+heavy: &#127947;
+# Challenges in Union and Subject Naming Strategy
+* {{no}} Message Filtering
+    - Similar to `SELECT...WHERE...` in `SQL`, and Message Selector in JMS
+    - There is NO BUILT-IN way to filter out unwanted messages
+* Add a new Type
+    - Breaks existing consumers if
+        * Using `SpecificRecord`
+        * AND filtering not implemented
+* {{heavy}} Evolve types inside Union
+
+---
 down: &#128078;
 arrow: &#8680;
 neutral: &#128528;
-# Challenges
+# Message Filtering
 * Because Kafka brokers are DUMB
-    * {{no}} Message Filtering
-        * Similar to `SELECT...WHERE...` in `SQL`, and Message Selector in JMS
 * and Kafka expects that
-    * Any consumer to take ALL messages it receives
-    * Consumer Logic: deserialize {{arrow}} pass-to-application-code {{arrow}} commit-offset
-    * {{neutral}} Consumer cannot say no to unwanted messages
+    * A consumer to take ALL messages it receives
+    * Consumer's Life:
+    ```
+        1. fetch messages in bytes
+        2. deserialize them into objects
+        3. pass to application code
+        4. process those objects
+        5. commit offset
+        6. repeat step 1
+    ```
+    * {{neutral}} Consumer cannot say no to unwanted bytes
 * {{down}} Consequently, Introducing new types BREAKS existing consumers
-    * Unless the consumer upgrade to newer schema
+    * Unless the consumer upgrades to newer schema
     * This happens to both the Union and Subject Naming Strategy approaches
 
 ---
@@ -257,7 +295,7 @@ up: &#128077;
 * {{up}} Deserialisation always SUCCEEDS
 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-&#128073; This means you can have producers publishing messages of new type using `SpecificRecord` while not breaking existing consumers to deserialise them into `GenericRecord`
+&#128073; One can have producers publishing messages of new type using `SpecificRecord` while not breaking existing consumers from consuming them in `GenericRecord`
 
 ---
 # Kafka Headers
@@ -294,7 +332,7 @@ cowork: &#129309;
         record.headers().add("Type", "MonetaryActivity".getBytes());
         producer.send(record);
         ```
-    * Deserializer convert them into `null` according to the tag
+    * Deserializer convert them into `null` as per tag value
         ```Java
         KafkaAvroDeserializer worker;
 
@@ -318,7 +356,8 @@ cowork: &#129309;
 &#128073; This technique can be applied to both Subject Naming Strategy and Union approaches
 ---
 # Conclusion
-* It Depends
+* It is Complicated!
+* It Depends.
 </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js">
 </script>
