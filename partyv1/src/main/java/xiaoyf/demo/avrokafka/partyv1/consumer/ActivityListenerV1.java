@@ -30,11 +30,9 @@ public class ActivityListenerV1 {
 
 		// To use custom tolerant deserializer
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, TolerantDeserializer.class);
-		// silentOnUnknownClasses is set to 'true' by default
-		props.put("tolerant.silentOnUnknownClasses", true);
-		// To enable filter by header
-		// props.put("tolerant.headerName", "Type");
-		// props.put("tolerant.headerValueRegex", "MonetaryActivity|NonMonetaryActivity");
+		props.put("tolerant.headerName", "Type");
+		props.put("tolerant.headerValueRegex", "MonetaryActivity|NonMonetaryActivity");
+		// props.put("tolerant.silentOnUnknownClasses", true);
 
 		final Consumer<String, SpecificRecordBase> consumer = new KafkaConsumer<>(props);
 		consumer.subscribe(Collections.singletonList(ACTIVITY_TOPIC));

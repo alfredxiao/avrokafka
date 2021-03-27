@@ -36,7 +36,7 @@ public class TolerantDeserializer implements Deserializer<Object> {
 		headerValueRegex = String.valueOf(configs.get("tolerant.headerValueRegex"));
 
 		Object flag = configs.get("tolerant.silentOnUnknownClasses");
-		silentOnUnknownClasses = flag == null || TRUE.equals(flag) || "true".equalsIgnoreCase(flag.toString());
+		silentOnUnknownClasses = flag != null && (TRUE.equals(flag) || "true".equalsIgnoreCase(flag.toString()));
 
 		// perhaps better remove these custom config entries before passing on
 		worker.configure(configs, isKey);

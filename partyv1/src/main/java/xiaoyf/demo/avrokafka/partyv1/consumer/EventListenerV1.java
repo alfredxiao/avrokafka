@@ -29,11 +29,9 @@ public class EventListenerV1 {
 
 		// To use custom tolerant deserializer
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, TolerantDeserializer.class);
-		// silentOnUnknownClasses is set to 'true' by default
-		props.put("tolerant.silentOnUnknownClasses", false);
-		// To enable filter by header
 	  props.put("tolerant.headerName", "Type");
 	  props.put("tolerant.headerValueRegex", "Sms");
+		// props.put("tolerant.silentOnUnknownClasses", true);
 
 		final Consumer<String, Event> consumer = new KafkaConsumer<String, Event>(props);
 		consumer.subscribe(Collections.singletonList(EVENT_TOPIC));

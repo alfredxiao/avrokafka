@@ -10,18 +10,16 @@ import java.util.Properties;
 
 import static xiaoyf.demo.avrokafka.Constants.*;
 
-public class ActivityListener0V1 {
+public class GenericListener {
 	public static void main(String[] args) {
 		Properties props = new Properties();
 
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, ActivityListener0V1.class.getName());
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, GenericListener.class.getName());
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
 		props.put("schema.registry.url", SCHEMA_REGISTRY_URL);
-
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
 
 		final Consumer<String, GenericRecord> consumer = new KafkaConsumer<String, GenericRecord>(props);
 		consumer.subscribe(Collections.singletonList(ACTIVITY_TOPIC));
