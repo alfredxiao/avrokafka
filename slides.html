@@ -96,6 +96,10 @@ Options, Challenges, and Techniques, Apr 2021
 * We compile Avro schemas into Java classes - `SpecificRecord`
 * One-topic-one-type
     * just like in database, one-table-one-entity
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+&#128073; In this slide, we use `SpecificRecord` to refer to those generated model classes
+
 ---
 arrow: &#8680;
 # Why Multitype in the Same Topic
@@ -134,8 +138,8 @@ down: &#128078;
 confused: &#128533;
 fcross: &#129310;
 # JSON
-* {{golf}} NO Schema at all, super flexible
-* {{up}} Supports arbitrary data structure
+* {{golf}} Zero Schema
+* {{up}} Super flexible
 * {{down}} Type is implicit
 * {{fcross}} Good luck on producers & consumers
 * This is effectively similar to using Compatibility Type `NONE` with Avro
@@ -154,8 +158,8 @@ fcross: &#129310;
 * {{golf}} One Schema for All
 * {{up}} Unique keys guarantee (Map)
 * {{down}} Potentially non-unique keys (Tuple)
-* {{juggle}} Various value types
-* {{heavy}} Nested structure
+* {{juggle}} Challenge supporting various value types
+* {{heavy}} Tricky on nested structure (especially for Tuple)
 * {{down}} Type is implicit
 * {{fcross}} Responsibilities on producers & consumers
 <br/><br/><br/><br/><br/><br/><br/><br/><br/>
