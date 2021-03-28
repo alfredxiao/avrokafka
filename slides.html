@@ -67,7 +67,7 @@ Options, Challenges, and Techniques, Apr 2021
 # Agenda
 
 0. Prelude
-1. Why Multitype
+1. Why Multitype in the Same Topic
 2. Options
 3. Challenges
 4. Techniques
@@ -83,7 +83,7 @@ arrow: &#8680;
 # Why Multitype in the Same Topic
 * Business nature
     - Events are naturally multityped within many business domains
-    - Events evolve as business evolve, they are unforeseeable
+    - Events evolve as business evolve
 * **Ordering !!!**
     - Ordering is CRITICAL to event based processing
         * have-your-cake {{arrow}} eat-it {{arrow}} &#129335;
@@ -111,7 +111,7 @@ fcross: &#129310;
 # JSON
 * {{golf}} NO Schema at all, super flexible
 * {{fcross}} Good luck on producers & consumers
-* This is effectively similar to using Compatibility Type `NONE` in Avro
+* This is effectively similar to using Compatibility Type `NONE` with Avro
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 &#128073; This is not saying one can't enforce schema with JSON
@@ -125,13 +125,14 @@ juggle: &#129337;
 fcross: &#129310;
 # Tuple & Map
 * {{golf}} One Schema for All
-* {{up}} Unique keys (Map only)
-* {{juggle}} Challenge to support various value types
-* {{heavy}} Difficult for nested structure
+* {{up}} Unique keys guarantee (Map)
+* {{down}} Potentially non-unique keys (Tuple)
+* {{juggle}} Various value types
+* {{heavy}} Nested structure
 * {{fcross}} Responsibilities on producers & consumers
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
-&#128073; Avro schema omitted
+&#128073; GraphQL does NOT support Map
 
 ---
 # Union
@@ -201,26 +202,26 @@ A: &#127312;
 * What is **Subject**?
     * {{Q}} : Can I use schema-registry without Kafka broker independently? (Schema Registry Issue #533)
     * {{A}} : Definitely. That's why we use slightly different terminology in the schema registry ("subjects") than we use in Kafka ("topics").
-* Mostly, people want one-topic-one-type, that is one-topic-one-subject
-    - Exactly the default strategy: `TopicNameStrategy`
+* Often people want one-topic-one-type, meaning one-topic-one-subject
+    - Hence the default strategy is: `TopicNameStrategy`
 * Two other strategies
     - `RecordNameStrategy`
     - `TopicRecordNameStrategy`
-* {{up}} Types evolve independently
+    - {{up}} Types evolve independently
 
 ---
 # Naming Strategies in Action
-* Producer publishes customer activities to a topic named `activity`, when using strategy
-* `TopicNameStrategy` (default)
-    - `activity-value`, only one type of message allowed
-* `RecordNameStrategy`
-    - `demo.model.MonetaryActivity`
-    - `demo.model.NonMonetaryActivity`
-    - ...
-* `TopicRecordNameStrategy`
-    - `activity-demo.model.MonetaryActivity`
-    - `activity-demo.model.NonMonetaryActivity`
-    - ...
+* Producer publishes customer activities to topic `activity`
+    * `TopicNameStrategy` (default)
+        - `activity-value`, only one type of message allowed
+    * `RecordNameStrategy`
+        - `demo.model.MonetaryActivity`
+        - `demo.model.NonMonetaryActivity`
+        - ...
+    * `TopicRecordNameStrategy`
+        - `activity-demo.model.MonetaryActivity`
+        - `activity-demo.model.NonMonetaryActivity`
+        - ...
 
 <br/><br/>
 &#128073; Control Center UI supports `TopicNameStrategy` only
@@ -253,7 +254,7 @@ A: &#127312;
 
 ---
 no:&#10060;
-heavy: &#127947;
+confused: &#128533;
 # Challenges in Union and Subject Naming Strategy
 * {{no}} Message Filtering
     - Similar to `SELECT...WHERE...` in `SQL`, and Message Selector in JMS
@@ -262,11 +263,14 @@ heavy: &#127947;
     - Breaks existing consumers if
         * Using `SpecificRecord`
         * AND filtering not implemented
-* {{heavy}} Evolve types inside Union
+* Deprecate a Type
+    - Breaks new consumers for the same reason
+* {{confused}} Evolve types inside Union
 
 ---
 down: &#128078;
-arrow: &#8680;
+arrow: &#8681;
+arrowup: &#8683;
 neutral: &#128528;
 # Message Filtering
 * Because Kafka brokers are DUMB
@@ -274,12 +278,11 @@ neutral: &#128528;
     * A consumer to take ALL messages it receives
     * Consumer's Life:
     ```
-        1. fetch messages in bytes
-        2. deserialize them into objects
-        3. pass to application code
-        4. process those objects
-        5. commit offset
-        6. repeat step 1
+        {{arrow}} fetch messages in bytes
+        {{arrow}} deserialize into objects
+        {{arrow}} process them
+        {{arrow}} commit offset
+        {{arrowup}} repeat
     ```
     * {{neutral}} Consumer cannot say no to unwanted bytes
 * {{down}} Consequently, Introducing new types BREAKS existing consumers
