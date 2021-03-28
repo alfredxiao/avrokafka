@@ -14,6 +14,11 @@
         font-weight: normal;
       }
 
+      .remark-slide-number {
+        opacity: 0.35;
+        font-size: 16px;
+      }
+
       div.remark-slide-scaler {
         width: 100%;
       }
@@ -53,6 +58,19 @@
       #conclusion + ul {
         font-size: 28px;
       }
+
+      #defensive-consumers {
+        border: 1px solid;
+        border-collapse: collapse;
+        width: 90%;
+        padding: 15px;
+        border-spacing: 0px;
+      }
+
+      #defensive-consumers th, td {
+        padding: 15px;
+        border: 1px solid;
+      }
     </style>
 </head>
 <body>
@@ -82,7 +100,7 @@ Options, Challenges, and Techniques, Apr 2021
 arrow: &#8680;
 # Why Multitype in the Same Topic
 * Business nature
-    - Events are naturally multityped within many business domains
+    - Events are naturally multityped within business domains
     - Events evolve as business evolve
 * **Ordering !!!**
     - Ordering is CRITICAL to event based processing
@@ -94,12 +112,19 @@ arrow: &#8680;
 <br/><br/><br/><br/>
 &#128073; There are other prerequisites for guaranteeing ordering in Kafka
 ---
+arrow: &#8681;
+blank: &nbsp;
+blank2: &nbsp;&nbsp;
+blank5: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+blank10: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+blank20: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+blank30: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 # Options
-* JSON
-* Tuple of KVP
-* Map
-* Union
-* Subject Naming Strategy
+* JSON{{blank30}}{{blank20}}*Schemaless*
+* Tuple of KVP{{blank30}}{{blank10}}{{blank5}}{{arrow}}
+* Map{{blank30}}{{blank20}}*Semi-schema*
+* Union{{blank30}}{{blank20}}{{blank5}}{{blank2}}{{arrow}}
+* Subject Naming Strategy{{blank10}}{{blank5}}*Schemaful*
 
 ---
 golf: &#127948;
@@ -110,9 +135,11 @@ confused: &#128533;
 fcross: &#129310;
 # JSON
 * {{golf}} NO Schema at all, super flexible
+* {{up}} Supports arbitrary data structure
+* {{down}} Type is implicit
 * {{fcross}} Good luck on producers & consumers
 * This is effectively similar to using Compatibility Type `NONE` with Avro
-<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 &#128073; This is not saying one can't enforce schema with JSON
 
@@ -129,8 +156,9 @@ fcross: &#129310;
 * {{down}} Potentially non-unique keys (Tuple)
 * {{juggle}} Various value types
 * {{heavy}} Nested structure
+* {{down}} Type is implicit
 * {{fcross}} Responsibilities on producers & consumers
-<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 &#128073; GraphQL does NOT support Map
 
@@ -274,8 +302,7 @@ arrowup: &#8683;
 neutral: &#128528;
 # Message Filtering
 * Because Kafka brokers are DUMB
-* and Kafka expects that
-    * A consumer to take ALL messages it receives
+* and Kafka requires that a consumer to take ALL messages it receives
     * Consumer's Life:
     ```
         {{arrow}} fetch messages in bytes
@@ -287,7 +314,9 @@ neutral: &#128528;
     * {{neutral}} Consumer cannot say no to unwanted bytes
 * {{down}} Consequently, Introducing new types BREAKS existing consumers
     * Unless the consumer upgrades to newer schema or implements custom filtering
-    * This happens to both the Union and Subject Naming Strategy approaches
+
+<br/><br/><br/><br/>
+&#128073; This applies to both the Union and Subject Naming Strategy approaches
 
 ---
 up: &#128077;
@@ -328,7 +357,7 @@ public interface Deserializer<T> {
 ---
 cowork: &#129309;
 # Techniques - Swallow But Not Digest with Header Filtering
-* {{cowork}} Filter out those unwanted messages
+* {{cowork}} Filter out unwanted messages
     * Producer tags a message's type via header
         ```Java
         record.headers().add("Type", "MonetaryActivity".getBytes());
@@ -339,7 +368,7 @@ cowork: &#129309;
         KafkaAvroDeserializer worker;
 
         public Object deserialize(String topic, Headers headers, byte[] data) {
-            if (!accepts(headers)) return null;
+            if (!isKnown(headers)) return null;
 
             return worker.deserialize(topic, headers, data);
         }
@@ -356,6 +385,32 @@ cowork: &#129309;
         ```
 
 &#128073; This technique can be applied to both Subject Naming Strategy and Union approaches
+
+---
+arrow: &#8694;
+umbrella: &#9748;
+# Safely Add New Types with Defensive Consumers
+<table id="defensive-consumers">
+    <tr>
+        <th>Producers</th><th>Topic</th><th>Consumers</th>
+    </tr>
+    <tr>
+        <td>ProducerA: E1</td>
+        <td rowspan="3" colspan="1" align="center">
+            {{arrow}}&nbsp;&nbsp;multi-events-topic&nbsp;&nbsp;{{arrow}}
+        </td>
+        <td>ConsumerA: E2 {{umbrella}}</td>
+    </tr>
+    <tr>
+        <td>ProducerB: E2  </td>
+        <td>ConsumerB: E1 | E2 {{umbrella}}</td>
+    </tr>
+    <tr>
+        <td>ProducerC: E-new  </td>
+        <td>ConsumerC: E1 | E-new </td>
+    </tr>
+</table>
+
 ---
 # Conclusion
 * It is Complicated!
