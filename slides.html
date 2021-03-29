@@ -367,7 +367,7 @@ cowork: &#129309;
         record.headers().add("Type", "MonetaryActivity".getBytes());
         producer.send(record);
         ```
-    * Deserializer convert them into `null` as per tag value
+    * Deserializer converts them into `null` as per tag value
         ```Java
         KafkaAvroDeserializer worker;
 
@@ -377,7 +377,7 @@ cowork: &#129309;
             return worker.deserialize(topic, headers, data);
         }
         ```
-    * Consumers ignore `null` messages and continue
+    * Consumer ignores `null` messages and continue
         ```Java
         props.put("value.deserializer", TolerantDeserializer.class);
         props.put("tolerant.headerName", "Type");
