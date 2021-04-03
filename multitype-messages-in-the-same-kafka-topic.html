@@ -243,17 +243,18 @@ A: &#127312;
 
 ---
 # Naming Strategies in Action
-* Producer publishes customer activities to topic `activity`
-    * `TopicNameStrategy` (default)
-        - `activity-value`, only one type of messages allowed
-    * `RecordNameStrategy`
-        - `demo.model.MonetaryActivity`
-        - `demo.model.NonMonetaryActivity`
-        - ...
-    * `TopicRecordNameStrategy`
-        - `activity-demo.model.MonetaryActivity`
-        - `activity-demo.model.NonMonetaryActivity`
-        - ...
+
+Producer with different strategies on topic `activity`, results in different "subjects"
+* `TopicNameStrategy`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(default)
+    - `activity-value` &nbsp;&nbsp;(single type)
+* `RecordNameStrategy`
+    - `demo.model.MonetaryActivity`
+    - `demo.model.NonMonetaryActivity`
+    - ...
+* `TopicRecordNameStrategy`
+    - `activity-demo.model.MonetaryActivity`
+    - `activity-demo.model.NonMonetaryActivity`
+    - ...
 
 <br/><br/>
 &#128073; Control Center UI supports `TopicNameStrategy` only
@@ -282,7 +283,7 @@ A: &#127312;
     ```
 
 <br/>
-&#128073; Generics omitted for brevity
+&#128073; Code in this presentation simplified for brevity
 
 ---
 no:&#10060;
