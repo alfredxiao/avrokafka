@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multitype Messages in the Same Kafka Topic</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+
+      .remark-slide-number {
+        opacity: 0.35;
+        font-size: 16px;
+      }
+
+      div.remark-slide-scaler {
+        width: 100%;
+      }
+
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      li{
+        margin: 12px 0;
+      }
+
+      #union-for-multitype + p + pre .avro {
+        font-size: 12.5px
+      }
+
+      #kafka-headers + ul pre .Java {
+        font-size: 16px;
+      }
+
+      #conclusion + ul {
+        font-size: 28px;
+      }
+
+      #defensive-consumers {
+        border: 1px solid;
+        border-collapse: collapse;
+        width: 90%;
+        padding: 15px;
+        border-spacing: 0px;
+      }
+
+      #defensive-consumers th, td {
+        padding: 15px;
+        border: 1px solid;
+      }
+    </style>
+</head>
+<body>
+<textarea id="source">
+
+class: center, middle
+
+# Multitype Messages in the Same Kafka Topic
+Options, Challenges, and Techniques, Apr 2021
+---
+
+# Agenda
+
+0. Prelude
+1. Why Multitype in the Same Topic
+2. Options
+3. Challenges
+4. Techniques
+
+---
+arrow: &#8680;
+# Prelude
+
+* Kafka, Schema Registry, Avro, Java
+* Avro schemas {{arrow}} Java classes - `SpecificRecord`
+* One-topic-one-type
+    * just like in database, one-table-one-entity
+
+---
+arrow: &#8680;
+# Why Multitype in the Same Topic
+* Events are multityped
+* **Ordering !!!**
+    - have-your-cake {{arrow}} eat-it {{arrow}} &#129335;
+    - eat-it {{arrow}} have-your-cake {{arrow}} &#127881;
+* Ordering in Kafka
+    - Only if events are in the same partition
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+&#128073; There are other prerequisites for ordering guarantee in Kafka
+---
+arrow: &#8681;
+blank: &nbsp;
+blank2: &nbsp;&nbsp;
+blank5: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+blank10: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+blank20: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+blank30: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+# Options
+* JSON{{blank30}}{{blank20}}*Schemaless*
+* Tuple of KVP{{blank30}}{{blank10}}{{blank5}}{{arrow}}
+* Map{{blank30}}{{blank20}}*Semi-schema*
+* Union{{blank30}}{{blank20}}{{blank5}}{{blank2}}{{arrow}}
+* Subject Naming Strategy{{blank10}}{{blank5}}*Schemaful*
+
+---
+golf: &#127948;
+up: &#128077;
+heavy: &#127947;
+down: &#128078;
+confused: &#128533;
+fcross: &#129310;
+# JSON
+* {{golf}} Zero Schema
+* {{up}} Super flexible
+* {{down}} Type is implicit
+* {{fcross}} Good luck on producers & consumers
+* This is effectively similar to using Compatibility Type `NONE` with Avro
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+&#128073; This is not saying one can't enforce schema with JSON
+
+---
+golf: &#127948;
+up: &#128077;
+heavy: &#127947;
+down: &#128078;
+juggle: &#129337;
+fcross: &#129310;
+# Tuple & Map
+* {{golf}} One Schema for All
+* {{up}} Unique keys guarantee (Map)
+* {{down}} Potentially non-unique keys (Tuple)
+* {{juggle}} Challenge supporting various value types
+* {{heavy}} Tricky on nested structure (especially for Tuple)
+* {{down}} Type is implicit
+* {{fcross}} Responsibilities on producers & consumers
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+&#128073; GraphQL does NOT support Map
+
+---
+# Union
+* In computer science, a union is a value that may have any of several representations or formats within the same position in memory. &#8213; Wikipedia
+* In Avro, a union indicates that a field might have more than one data type. E.g.
+```avro
+    {
+       "type" : "record",
+       "name" : "Candidate",
+       "fields" :
+       [
+          {
+             "name" : "experience",
+             "type": ["string", "int"]
+          }
+       ]
+    }
+```
+
+---
+# Union for Multitype
+In below schema, `payload` holds either a `Sms` or `Email` type
+```avro
+    {
+      "type": "record",
+      "name": "Event",
+      "namespace": "demo.model",
+      "fields": [
+        {
+          "name" : "eventId", "type" : "string"
+        },{
+          "name" : "payload",
+          "type" : [
+            {
+              "type" : "record",
+              "name" : "Sms",
+              "fields" : [
+                {
+                  "name" : "phoneNumber", "type" : "string"
+                },{
+                  "name" : "text", "type" : "string"
+                }
+              ]
+            },{
+              "type" : "record",
+              "name" : "Email",
+              "fields" : [
+                {
+                  "name" : "address", "type" : "string"
+                },{
+                  "name" : "title", "type" : "string"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+```
+
+---
+up: &#128077;
+down: &#128078;
+Q: &#127328;
+A: &#127312;
+# Subject Naming Strategy
+* What is **Subject**?
+    * Schema Registry Issue #533
+    ```
+    {{Q}} : Can I use schema-registry without Kafka broker independently?
+    {{A}} : Definitely. That's why we use slightly different terminology in the schema registry ("subjects")
+             than we use in Kafka ("topics").
+    ```
+* Often we want one-topic-one-type
+    - Default strategy is: `TopicNameStrategy`
+* Two other strategies
+    - `RecordNameStrategy`
+    - `TopicRecordNameStrategy`
+    - {{up}} Types evolve independently
+
+---
+# Naming Strategies in Action
+* Producer publishes customer activities to topic `activity`
+    * `TopicNameStrategy` (default)
+        - `activity-value`, only one type of messages allowed
+    * `RecordNameStrategy`
+        - `demo.model.MonetaryActivity`
+        - `demo.model.NonMonetaryActivity`
+        - ...
+    * `TopicRecordNameStrategy`
+        - `activity-demo.model.MonetaryActivity`
+        - `activity-demo.model.NonMonetaryActivity`
+        - ...
+
+<br/><br/>
+&#128073; Control Center UI supports `TopicNameStrategy` only
+
+---
+# Naming Strategy in Code
+* Producer
+    ```Java
+    props.put("value.subject.name.strategy", TopicRecordNameStrategy.class);
+
+    // Subject: activity-demo.model.MonetaryActivity
+    producer.send(new ProducerRecord("activity", "key1", new MonetaryActivity()));
+
+    // Subject: activity-demo.model.NonMonetaryActivity
+    producer.send(new ProducerRecord("activity", "key2", new NonMonetaryActivity()));
+    ```
+* Consumer
+    ```Java
+    ConsumerRecords records = consumer.poll(ONE_SECOND);
+    for (ConsumerRecord record : records) {
+        Object activity = record.value();
+
+        if (activity instanceof MonetaryActivity) { ... }
+        if (activity instanceof NonMonetaryActivity) { ... }
+    }
+    ```
+
+<br/>
+&#128073; Generics omitted for brevity
+
+---
+no:&#10060;
+confused: &#128533;
+# Challenges in Union and Subject Naming Strategy
+* Introducing a new Type
+    - Breaks existing consumers using `SpecificRecord`
+* Message Filtering
+    - Similar to `SELECT...WHERE...` in `SQL`, and Message Selector in JMS
+    - {{no}} BUILT-IN way to filter out unwanted messages
+
+---
+down: &#128078;
+arrow: &#8681;
+arrowup: &#8683;
+neutral: &#128528;
+# Message Filtering
+* Because Kafka brokers are 'DUMB'
+* and Kafka requires that a consumer to take ALL messages it receives
+    * Consumer's Life:
+    ```
+        {{arrow}} fetch messages in bytes
+        {{arrow}} deserialize into objects
+        {{arrow}} process them
+        {{arrow}} commit offset
+        {{arrowup}} repeat
+    ```
+    * {{neutral}} Consumer cannot say no to unwanted bytes
+* Custom filtering needed
+
+<br/><br/><br/><br/>
+&#128073; This applies to both the Union and Subject Naming Strategy approaches
+
+---
+up: &#128077;
+# Techniques - GenericRecord
+* Consumers choose `GenericRecord` rather than `SpecificRecord`
+* This is quite similar to Map approach
+* {{up}} Deserialisation always SUCCEEDS
+* &#128073; Hybrid approach
+    * Producers use `SpecificRecord`
+    * Consumers use `GenericRecord`
+
+---
+# Kafka Headers
+* Purpose of headers, e.g.
+    - routing
+    - authentication, etc.
+* Header support added to Kafka in version 0.11 in 2017
+* Available to Producer and Consumer
+* Header support added to `Deserialiser` interface in 2018
+```Java
+public interface Deserializer<T> {
+
+  &#8192;&#8192;T deserialize(String topic, byte[] data);
+
+  &#8192;&#8192;T deserialize(String topic, Headers headers, byte[] data);
+}
+```
+
+---
+cowork: &#129309;
+# Techniques - Swallow But Not Digest
+* {{cowork}} Message Filtering with Headers
+    * Producer assigns a header
+        ```Java
+        record.addHeader("Type", "MonetaryActivity");
+        producer.send(record);
+        ```
+    * Deserializer returns `null` upon unknown headers
+        ```Java
+        public Object deserialize(String topic, Headers headers, byte[] data) {
+            if (!isKnown(headers)) return null;
+            ...
+        }
+        ```
+    * Consumer ignores `null`
+        ```Java
+        for (ConsumerRecord record : records) {
+            if (record.value() == null) continue;
+            ...
+        }
+        ```
+
+&#128073; This technique can be applied to both Subject Naming Strategy and Union approaches
+
+---
+arrow: &#8694;
+umbrella: &#9748;
+# Safely Add New Types with Defensive Consumers
+<table id="defensive-consumers">
+    <tr>
+        <th>Producers</th><th>Topic</th><th>Consumers</th>
+    </tr>
+    <tr>
+        <td>ProducerA: E1</td>
+        <td rowspan="3" colspan="1" align="center">
+            {{arrow}}&nbsp;&nbsp;multi-events-topic&nbsp;&nbsp;{{arrow}}
+        </td>
+        <td>ConsumerA: E1 {{umbrella}}</td>
+    </tr>
+    <tr>
+        <td>ProducerB: E2  </td>
+        <td>ConsumerB: E1 | E2 {{umbrella}}</td>
+    </tr>
+    <tr>
+        <td>ProducerC: E-new  </td>
+        <td>ConsumerC: E1 | E-new </td>
+    </tr>
+</table>
+
+---
+# Conclusion
+* It is Complicated!
+* It Depends.
+</textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js">
+</script>
+<script>
+      var slideshow = remark.create({ ratio: "16:9" });
+    </script>
+</body>
+</html>
