@@ -52,6 +52,22 @@
         padding: 15px;
         border: 1px solid;
       }
+
+      #json + ul {
+        list-style-type: none;
+        padding: 5px;
+        margin: 15px;
+      }
+      #tuple-map + ul {
+        list-style-type: none;
+        padding: 5px;
+        margin: 15px;
+      }
+      #conclusion + ul {
+        list-style-type: none;
+        padding: 5px;
+        margin: 15px;
+      }
     </style>
 </head>
 <body>
@@ -65,11 +81,11 @@ Options, Challenges, and Techniques, Apr 2021
 
 # Agenda
 
-0. Prelude
-1. Why Multitype in the Same Topic
-2. Options
-3. Challenges
-4. Techniques
+1. Prelude
+2. Why Multitype in the Same Topic
+3. Options
+4. Challenges
+5. Techniques
 
 ---
 arrow: &#8680;
@@ -101,11 +117,11 @@ blank10: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 blank20: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 blank30: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 # Options
-* JSON{{blank30}}{{blank20}}*Schemaless*
-* Tuple of KVP{{blank30}}{{blank10}}{{blank5}}{{arrow}}
-* Map{{blank30}}{{blank20}}*Semi-schema*
-* Union{{blank30}}{{blank20}}{{blank5}}{{blank2}}{{arrow}}
-* Subject Naming Strategy{{blank10}}{{blank5}}*Schemaful*
+1. JSON{{blank30}}{{blank20}}*Schemaless*
+2. Tuple of KVP{{blank30}}{{blank10}}{{blank5}}{{arrow}}
+3. Map{{blank30}}{{blank20}}*Semi-schema*
+4. Union{{blank30}}{{blank20}}{{blank5}}{{blank2}}{{arrow}}
+5. Subject Naming Strategy{{blank10}}{{blank5}}*Schemaful*
 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 &#128073; Some have a consumer subscribe to multiple single-typed topics, which has no ordering guarantee.
@@ -123,7 +139,7 @@ fcross: &#129310;
 * {{down}} Type is implicit
 * {{fcross}} Good luck on producers & consumers
 * This is effectively similar to using Compatibility Type `NONE` with Avro
-<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 &#128073; This is not saying one can't enforce schema with JSON
 
@@ -142,7 +158,7 @@ fcross: &#129310;
 * {{heavy}} Tricky on nested structure (especially for Tuple)
 * {{down}} Type is implicit
 * {{fcross}} Responsibilities on producers & consumers
-<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/>
 
 &#128073; GraphQL does NOT support Map
 
@@ -333,7 +349,7 @@ cowork: &#129309;
 * {{cowork}} Message Filtering with Headers
     * Producer assigns a header
         ```Java
-        record.addHeader("Type", "MonetaryActivity");
+        record.headers().add("Type", "MonetaryActivity");
         producer.send(record);
         ```
     * Deserializer returns `null` upon unknown headers
