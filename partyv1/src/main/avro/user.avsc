@@ -1,0 +1,10 @@
+{
+    "type": "record",
+    "name": "Candidate",
+    "fields": [
+        {
+            "name" : "experience",
+            "type" : ["long", "string"]
+        }
+    ]
+}
