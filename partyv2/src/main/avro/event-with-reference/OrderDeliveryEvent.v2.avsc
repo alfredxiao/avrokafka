@@ -1,0 +1,24 @@
+{
+    "type": "record",
+    "name": "OrderDeliveryEvent",
+    "namespace": "demo.model",
+    "fields": [
+        {
+            "name" : "orderId",
+            "type" : "string"
+        },
+        {
+            "name" : "delivered",
+            "type" : "boolean"
+        },
+        {
+            "name" : "when",
+            "type" : "long"
+        },
+        {
+            "name" : "signedName",
+            "type" : ["null", "string"],
+            "default" : null
+        }
+    ]
+}

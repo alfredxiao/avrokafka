@@ -1,0 +1,4 @@
+[
+    "demo.model.PlaceOrderEvent",
+    "demo.model.OrderDeliveryEvent"
+]
