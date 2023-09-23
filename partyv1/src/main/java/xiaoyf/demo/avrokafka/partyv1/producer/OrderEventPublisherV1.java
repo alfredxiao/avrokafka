@@ -18,7 +18,7 @@ public class OrderEventPublisherV1 {
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-		props.put("schema.registry.url", SCHEMA_REGISTRY_URL_MON);
+		props.put("schema.registry.url", SCHEMA_REGISTRY_URL);
 		props.put("auto.register.schemas", false);
 		props.put("use.latest.version", true);
 		KafkaProducer<String, Object> producer = new KafkaProducer<>(props);

@@ -17,7 +17,8 @@ public class TransactionPublisherV1 {
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
 		props.put("schema.registry.url", SCHEMA_REGISTRY_URL);
-		props.put("auto.register.schemas", true);
+		props.put("auto.register.schemas", false);
+		props.put("use.latest.version", true);
 		KafkaProducer<String, Transaction> producer = new KafkaProducer<>(props);
 
 		long timestamp = System.currentTimeMillis();
